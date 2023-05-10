@@ -23,8 +23,7 @@ exports.create = async payload => {
                 email: payload.email,
                 password: hashPassword,
                 fullName: payload.fullName
-            },
-            {attributes: {exclude: 'password'}}
+            }
         )
 
         newUser.password = undefined;
