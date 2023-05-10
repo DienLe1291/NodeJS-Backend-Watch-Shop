@@ -18,6 +18,9 @@ const Comment = sequelize.define('Comment', {
     image: {
         type: DataTypes.STRING
     },
+    cloudinaryId: {
+        type: DataTypes.STRING
+    },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,

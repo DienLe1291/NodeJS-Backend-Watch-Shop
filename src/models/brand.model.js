@@ -13,6 +13,9 @@ const Brand = sequelize.define('Brand', {
     },
     image: {
         type: DataTypes.STRING
+    },
+    cloudinaryId: {
+        type: DataTypes.STRING
     }
 }, {
     tableName: 'brands'

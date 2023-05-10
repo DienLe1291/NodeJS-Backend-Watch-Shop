@@ -22,6 +22,9 @@ module.exports = {
             image: {
                 type: Sequelize.STRING
             },
+            cloudinaryId: {
+                type: Sequelize.STRING
+            },
             description: {
                 type: Sequelize.TEXT
             },

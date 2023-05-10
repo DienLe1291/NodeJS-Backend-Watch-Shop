@@ -20,6 +20,9 @@ const Watch = sequelize.define('Watch', {
     image: {
         type: DataTypes.STRING
     },
+    cloudinaryId: {
+        type: DataTypes.STRING
+    },
     description: {
         type: DataTypes.TEXT
     },

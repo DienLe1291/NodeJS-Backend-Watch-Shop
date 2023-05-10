@@ -29,6 +29,9 @@ module.exports = {
                 type: Sequelize.STRING,
                 defaultValue: null
             },
+            cloudinaryId: {
+                type: Sequelize.STRING
+            },
             roleId: {
                 type: Sequelize.INTEGER,
                 defaultValue: 1, // 0: admin, 1: customer

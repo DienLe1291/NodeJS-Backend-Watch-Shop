@@ -27,6 +27,9 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         defaultValue: null
     },
+    cloudinaryId: {
+        type: DataTypes.STRING
+    },
     roleId: {
         type: DataTypes.INTEGER,
         defaultValue: 1, // 0: admin, 1: customer
