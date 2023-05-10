@@ -23,10 +23,6 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         defaultValue: null
     },
-    address: {
-        type: DataTypes.STRING,
-        defaultValue: null
-    },
     image: {
         type: DataTypes.STRING,
         defaultValue: null

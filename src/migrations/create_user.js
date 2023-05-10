@@ -25,10 +25,6 @@ module.exports = {
                 type: Sequelize.STRING,
                 defaultValue: null
             },
-            address: {
-                type: Sequelize.STRING,
-                defaultValue: null
-            },
             image: {
                 type: Sequelize.STRING,
                 defaultValue: null
