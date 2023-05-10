@@ -29,7 +29,10 @@ exports.create = async payload => {
         newUser.password = undefined;
 
         const accessToken = jwt.sign(
-            {userId: newUser.id},
+            {
+                userId: newUser.id,
+                roleId: newUser.roleId
+            },
             process.env.ACCESS_TOKEN_SECRET
         )
 
@@ -77,7 +80,10 @@ exports.login = async (email, password) => {
         user.password = undefined
 
         const accessToken = jwt.sign(
-            {userId: user.id},
+            {
+                userId: user.id,
+                roleId: user.roleId
+            },
             process.env.ACCESS_TOKEN_SECRET
         )
 

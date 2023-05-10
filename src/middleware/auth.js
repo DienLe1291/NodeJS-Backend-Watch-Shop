@@ -15,6 +15,7 @@ const verifyToken = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
         req.userId = decoded.userId;
+        req.roleId = decoded.roleId;
         next();
     } catch (error) {
         console.log(error);
@@ -26,7 +27,15 @@ const verifyToken = (req, res, next) => {
 }
 
 const verifyAdmin = (req, res, next) => {
-
+    if (req.roleId === 0) {
+        next();
+    }
+    else {
+        return res.status(403).json({
+            success: false,
+            message: 'Người dùng không có quyền thực hiện chức năng này'
+        })
+    }
 }
 
 export { verifyToken, verifyAdmin };
