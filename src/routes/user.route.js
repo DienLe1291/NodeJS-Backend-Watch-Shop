@@ -1,14 +1,19 @@
 import express from 'express';
 import UserController from '../controllers/user.controller';
-import { verifyToken } from '../middleware/auth';
+import { verifyToken, verifyAdmin } from '../middleware/auth';
 
 const router = express.Router();
+
+router.get('/', verifyToken, verifyAdmin, UserController.getAllUsers);
 
 router.post('/register', UserController.register);
 
 router.post('/login', UserController.login);
 
-router.put('/:id', verifyToken, UserController.update);
+router.route('/:id')
+    .get(verifyToken, UserController.getUser)
+    .put(verifyToken, UserController.update)
+    .delete(verifyToken, verifyAdmin, UserController.delete);
 
 router.put('/change-password/:id', verifyToken, UserController.changePassword)
 

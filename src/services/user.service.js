@@ -104,6 +104,55 @@ exports.login = async (email, password) => {
     }
 }
 
+exports.findAll = async () => {
+    try {
+        const allUsers = await User.findAll({attributes: {exclude: 'password'}});
+
+        return {
+            success: true,
+            statusCode: 200,
+            allUsers
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            statusCode: 500,
+            message: 'Lỗi máy chủ'
+        }
+    }
+}
+
+exports.findById = async userId => {
+    try {
+        const user = await User.findOne({
+            where: {id: userId},
+            attributes: {exclude: 'password'}
+        });
+
+        if (!user) {
+            return {
+                success: false,
+                statusCode: 400,
+                message: 'Không tìm thấy người dùng'
+            }
+        }
+
+        return {
+            success: true,
+            statusCode: 200,
+            user
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            statusCode: 500,
+            message: 'Lỗi máy chủ'
+        }
+    }
+}
+
 exports.update = async (payload, userId) => {
 
     try {
@@ -171,6 +220,39 @@ exports.updatePassword = async (password, newPassword, userId) => {
             success: true,
             statusCode: 200,
             message: 'Đổi mật khẩu thành công'
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            statusCode: 500,
+            message: 'Lỗi máy chủ'
+        }
+    }
+}
+
+exports.delete = async userId => {
+    try {
+        const deleteUser = await User.findOne({
+            where: {id: userId},
+            attributes: {exclude: 'password'}
+        });
+
+        if (deleteUser.roleId === 0) {
+            return {
+                success: false,
+                statusCode: 400,
+                message: 'Không thể xóa người dùng quản trị'
+            }
+        }
+
+        await User.destroy({where: {id: userId}});
+
+        return {
+            success: true,
+            statusCode: 200,
+            message: 'Xóa người dùng thành công',
+            deleteUser
         }
     } catch (error) {
         console.log(error);

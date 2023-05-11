@@ -1,5 +1,56 @@
 import UserService from '../services/user.service';
 
+// @route GET /api/user/:id
+// @desc get user
+// @access private
+exports.getUser = async (req, res) => {
+     // Check user not authorised or user not admin
+    if ((req.params.id != req.userId) && req.roleId !== 0){
+        return res.status(400).json({
+            success: false,
+            message: 'Người dùng không có quyền thực hiện chức năng này'
+        })
+    }
+
+    try {
+        const userId = req.params.id;
+        const data = await UserService.findById(userId);
+
+        res.status(data.statusCode).json({
+            success: data.success,
+            message: data.message,
+            user: data.user
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi máy chủ'
+        })
+    }
+}
+
+// @route GET /api/user
+// @desc get all users
+// @access protected (admin)
+exports.getAllUsers = async (req, res) => {
+    try {
+        const data = await UserService.findAll();
+
+        res.status(data.statusCode).json({
+            success: data.success,
+            message: data.message,
+            allUsers: data.allUsers
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi máy chủ'
+        })
+    }
+}
+
 // @route POST /api/user/register
 // @desc register new account
 // @access public
@@ -76,10 +127,11 @@ exports.update = async (req, res) => {
         })
     }
 
-    if (req.params.id != req.userId){
+    // Check user not authorised or user not admin
+    if ((req.params.id != req.userId) && req.roleId !== 0){
         return res.status(400).json({
             success: false,
-            message: 'Người dùng không có quyền sửa thông tin'
+            message: 'Người dùng không có quyền thực hiện chức năng này'
         })
     }
 
@@ -120,7 +172,7 @@ exports.changePassword = async (req, res) => {
     if (req.params.id != req.userId){
         return res.status(400).json({
             success: false,
-            message: 'Người dùng không có quyền đổi mật khẩu'
+            message: 'Người dùng không có quyền thực hiện chức năng này'
         })
     }
 
@@ -135,6 +187,29 @@ exports.changePassword = async (req, res) => {
             success: data.success,
             message: data.message,
             user: data.user
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi máy chủ'
+        })
+    }
+}
+
+// @route DELETE /api/user/:id
+// @desc delete a user by id
+// @access protected (admin) 
+exports.delete = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const data = await UserService.delete(userId);
+
+        res.status(data.statusCode).json({
+            success: data.success,
+            message: data.message,
+            deleteUser: data.deleteUser
         })
     } catch (error) {
         console.log(error);
