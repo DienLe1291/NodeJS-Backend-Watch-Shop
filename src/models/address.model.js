@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/connectDB';
 
 const Address = sequelize.define('Address', {
     id: {
@@ -21,6 +22,10 @@ const Address = sequelize.define('Address', {
     detail: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    isDefault: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     },
     userId: {
         type: DataTypes.STRING,

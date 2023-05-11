@@ -25,6 +25,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            isDefault: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false
+            },
             userId: {
                 type: Sequelize.STRING,
                 allowNull: false
