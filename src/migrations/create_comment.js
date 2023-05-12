@@ -4,10 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('comments', {
             id: {
-                allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.INTEGER
+                type: Sequelize.BIGINT(11)
             },
             content: {
                 type: Sequelize.TEXT
@@ -24,12 +23,10 @@ module.exports = {
                 type: Sequelize.STRING
             },
             userId: {
-                type: Sequelize.INTEGER,
-                allowNull: false
+                type: Sequelize.BIGINT(11)
             },
             watchId: {
-                type: Sequelize.INTEGER,
-                allowNull: false
+                type: Sequelize.BIGINT(11)
             },
             createdAt: {
                 allowNull: false,

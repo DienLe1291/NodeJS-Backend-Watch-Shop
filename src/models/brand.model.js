@@ -1,9 +1,10 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import Watch from './watch.model';
 
 const Brand = sequelize.define('Brand', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
         autoIncrement: true
     },
@@ -20,5 +21,7 @@ const Brand = sequelize.define('Brand', {
 }, {
     tableName: 'brands'
 });
+
+Brand.hasMany(Watch, { foreignKey: 'brandId', as: 'brand' });
 
 export default Brand;

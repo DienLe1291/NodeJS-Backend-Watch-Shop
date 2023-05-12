@@ -4,7 +4,6 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('orders', {
             id: {
-                allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER
@@ -24,12 +23,10 @@ module.exports = {
                 type: Sequelize.BOOLEAN
             },
             userId: {
-                type: Sequelize.INTEGER,
-                allowNull: false
+                type: Sequelize.BIGINT(11)
             },
             statusId: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
+                type: Sequelize.BIGINT(11),
                 defaultValue: 1
             },
             createdAt: {

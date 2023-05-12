@@ -1,11 +1,13 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Deferrable } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import User from './user.model';
 
 const Address = sequelize.define('Address', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false
     },
     province: {
         type: DataTypes.STRING,
@@ -28,15 +30,17 @@ const Address = sequelize.define('Address', {
         defaultValue: false
     },
     userId: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: DataTypes.BIGINT(11),
         references: {
-            model: 'User',
+            model: User,
             key: 'id'
         }
     }
 }, {
     tableName: 'addresses'
 });
+
+Address.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+// Address.belongsTo(User, { foreignKey: 'userId', targetKey: 'id', as: 'user' });
 
 export default Address;

@@ -1,9 +1,11 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import User from './user.model';
+import Watch from './watch.model';
 
 const Comment = sequelize.define('Comment', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
         autoIncrement: true
     },
@@ -22,23 +24,26 @@ const Comment = sequelize.define('Comment', {
         type: DataTypes.STRING
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         allowNull: false,
         references: {
-            model: 'User',
+            model: User,
             key: 'id'
         }
     },
     watchId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         allowNull: false,
         references: {
-            model: 'Watch',
+            model: Watch,
             key: 'id'
         }
     }
 }, {
     tableName: 'comments'
 });
+
+Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Comment.belongsTo(Watch, { foreignKey: 'watchId', as: 'watch' });
 
 export default Comment;

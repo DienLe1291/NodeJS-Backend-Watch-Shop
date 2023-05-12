@@ -4,7 +4,6 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('watches', {
             id: {
-                allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER
@@ -29,8 +28,7 @@ module.exports = {
                 type: Sequelize.TEXT
             },
             brandId: {
-                type: Sequelize.INTEGER,
-                allowNull: false
+                type: Sequelize.BIGINT(11)
             },
             createdAt: {
                 allowNull: false,

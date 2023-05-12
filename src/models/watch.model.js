@@ -1,9 +1,11 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import Comment from './comment.model';
+import Brand from './brand.model';
 
 const Watch = sequelize.define('Watch', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
         autoIncrement: true
     },
@@ -27,15 +29,18 @@ const Watch = sequelize.define('Watch', {
         type: DataTypes.TEXT
     },
     brandId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         allowNull: false,
         references: {
-            model: 'Brand',
+            model: Brand,
             key: 'id'
         }
     }
 }, {
     tableName: 'watches'
 });
+
+Watch.belongsTo(Brand, { foreignKey: 'brandId', as: 'brand' });
+Watch.hasMany(Comment, { foreignKey: 'watchId', as: 'watch' });
 
 export default Watch;

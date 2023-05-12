@@ -1,14 +1,19 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import Address from './address.model';
+import Comment from './comment.model';
+import Order from './order.model';
 
 const User = sequelize.define('User', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false
     },
     email: {
         type: DataTypes.STRING,
+        unique: true,
         allowNull: false
     },
     password: {
@@ -38,5 +43,9 @@ const User = sequelize.define('User', {
 }, {
     tableName: 'users'
 });
+
+User.hasMany(Address, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Comment, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Order, { foreignKey: 'userId', as: 'user' });
 
 export default User;

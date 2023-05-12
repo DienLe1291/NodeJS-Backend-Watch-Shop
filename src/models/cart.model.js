@@ -1,9 +1,11 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import User from './user.model';
+import Watch from './watch.model';
 
 const Cart = sequelize.define('Cart', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
         autoIncrement: true
     },
@@ -12,23 +14,23 @@ const Cart = sequelize.define('Cart', {
         allowNull: false
     },
     userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: DataTypes.BIGINT(11),
         references: {
-            model: 'User',
+            model: User,
             key: 'id'
         }
     },
     watchId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: DataTypes.BIGINT(11),
         references: {
-            model: 'Watch',
+            model: Watch,
             key: 'id'
         }
     }
 }, {
     tableName: 'carts'
 });
+
+Cart.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 export default Cart;

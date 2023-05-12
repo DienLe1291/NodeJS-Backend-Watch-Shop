@@ -1,9 +1,11 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/connectDB';
+import User from './user.model';
+import Order_Status from './order_status.model';
 
 const Order = sequelize.define('Order', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT(11),
         primaryKey: true,
         autoIncrement: true
     },
@@ -22,24 +24,25 @@ const Order = sequelize.define('Order', {
         type: DataTypes.BOOLEAN
     },
     userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: DataTypes.BIGINT(11),
         references: {
-            model: 'User',
+            model: User,
             key: 'id'
         }
     },
     statusId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: DataTypes.BIGINT(11),
         defaultValue: 1,
         references: {
-            model: 'Order_Status',
+            model: Order_Status,
             key: 'id'
         }
     }
 }, {
     tableName: 'orders'
 });
+
+Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Order.belongsTo(Order_Status, { foreignKey: 'statusId', as: 'order_status' });
 
 export default Order;
