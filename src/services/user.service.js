@@ -1,148 +1,121 @@
-import User from '../models/user.model';
+import db from '../models';
 import agron2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import cloudinary from '../utils/cloudinary';
+import fs from 'fs';
 
-exports.create = async payload => {
+exports.create = async payload => new Promise(async (resolve, reject) => {
     try {
-        const user = await User.findOne({
-            where: { 
-                email: payload.email 
-            }
-        })
-        if (user)
-            return {
-                success: false,
-                statusCode: 400,
-                message: 'Email này đã có tài khoản'
-            }
-
         const hashPassword = await agron2.hash(payload.password);
 
-        const newUser = await User.create(
-            {
+        const rsp = await db.User.findOrCreate({
+            where: {email: payload.email},
+            defaults: {
                 email: payload.email,
                 password: hashPassword,
                 fullName: payload.fullName
             }
-        )
+        })
 
-        newUser.password = undefined;
-
-        const accessToken = jwt.sign(
+        const accessToken = rsp[1] && jwt.sign(
             {
-                userId: newUser.id,
-                roleId: newUser.roleId
+                userId: rsp[0].id,
+                roleId: rsp[0].roleId
             },
-            process.env.ACCESS_TOKEN_SECRET
+            process.env.ACCESS_TOKEN_SECRET,
+            {expiresIn: '1d'}
         )
 
-        return {
-            success: true,
-            statusCode: 200,
-            message: 'Tạo tài khoản thành công',
-            accessToken,
-            newUser
-        };
+        rsp[0].password = undefined;
+        resolve({
+            success: rsp[1] ? true : false,
+            message: rsp[1] ? 'Tạo tài khoản thành công' : 'Email này đã có tài khoản',
+            accessToken: accessToken || undefined,
+            newUser: rsp[1] ? rsp[0] : undefined
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        };
+        reject(error);
     }
-}
+}) 
 
-exports.login = async (email, password) => {
+exports.login = async (email, password) => new Promise(async (resolve, reject) => {
     try {
-        let user = await User.findOne({
-            where: { email }
+        let user = await db.User.findOne({
+            where: { email },
+            raw: true
         })
 
         if (!user) {
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Tên tài khoản hoặc mật khẩu không chính xác'
-            }
+            })
         }
 
         const checkPassword = await agron2.verify(user.password, password);
 
         if (!checkPassword){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Tên tài khoản hoặc mật khẩu không chính xác'
-            }
+            })
         }
-
-        user.password = undefined
 
         const accessToken = jwt.sign(
             {
                 userId: user.id,
                 roleId: user.roleId
             },
-            process.env.ACCESS_TOKEN_SECRET
+            process.env.ACCESS_TOKEN_SECRET,
+            {expiresIn: '1d'}
         )
-
-        return {
+            
+        user.password = undefined
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Đăng nhập thành công',
             accessToken,
             user
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.findAll = async () => {
+exports.findAll = async () => new Promise(async (resolve, reject) => {
     try {
-        const allUsers = await User.findAll({attributes: {exclude: 'password'}});
-
-        return {
-            success: true,
-            statusCode: 200,
-            allUsers
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
-    }
-}
-
-exports.findById = async userId => {
-    try {
-        const user = await User.findOne({
-            where: {id: userId},
+        const allUsers = await db.User.findAll({
+            raw: true,
             attributes: {exclude: 'password'}
         });
 
+        resolve({
+            success: true,
+            allUsers
+        })
+    } catch (error) {
+        reject(error);
+    }
+}) 
+
+exports.findById = async userId => new Promise(async (resolve, reject) => {
+    try {
+        const user = await db.User.findByPk(
+            userId,
+            {raw: true, attributes: {exclude: 'password'}}
+        );
+
         if (!user) {
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Không tìm thấy người dùng'
-            }
+            })
         }
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             user
-        }
+        })
     } catch (error) {
         console.log(error);
         return {
@@ -151,115 +124,124 @@ exports.findById = async userId => {
             message: 'Lỗi máy chủ'
         }
     }
-}
+}) 
 
-exports.update = async (payload, userId) => {
-
+exports.update = async (payload, userId) => new Promise(async (resolve, reject) => {
     try {
-        const rsp = await User
-            .update(payload, {where: {id: userId}})
+        const user = await db.User.findByPk(userId, {raw: true});
 
-        if (rsp[0] === 0){
-            return {
-                success: false,
-                statusCode: 400,
-                message: 'Không tìm thấy thông tin người dùng'
+        if (payload.image) {
+            // upload new avatar to cloudinary server
+            const uploadImage = await cloudinary.uploader.upload(payload.image, {folder: 'watch_shop/user_avatar'});
+            fs.unlink(payload.image, (err) => {console.log(err)})
+            
+            payload = {
+                ...payload,
+                image: uploadImage.secure_url,
+                cloudinaryId: uploadImage.public_id
+            }
+
+            // delete old avatar in cloudinary server
+            if (user.cloudinaryId){
+                await cloudinary.uploader.destroy(user.cloudinaryId);
             }
         }
 
-        const updateUser = await User
+        const rsp = await db.User.update(payload, {where: {id: userId}})
+
+        if (rsp[0] === 0){
+            return resolve({
+                success: false,
+                message: 'Không tìm thấy thông tin người dùng'
+            })
+        }
+
+        const updateUser = await db.User
             .findOne({
+                raw: true,
                 where: {id: userId},
                 attributes: {exclude: 'password'}
             });
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Cập nhật thông tin thành công',
             updateUser
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.updatePassword = async (password, newPassword, userId) => {
+exports.updatePassword = async (password, newPassword, userId) => new Promise(async (resolve, reject) => {
     try {
-        const user = await User.findOne({where: {id: userId}});
+        const user = await db.User.findOne({where: {id: userId}});
         if (!user){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Không tìm thấy thông tin người dùng'
-            }
+            })
         }
 
         const checkPassword = await agron2.verify(user.password, password);
-
         if (!checkPassword){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Mật khẩu không chính xác'
-            }
+            })
         }
 
         const hashNewPassword = await agron2.hash(newPassword);
-        await User.update(
+        await db.User.update(
             {password: hashNewPassword},
             {where: {id: userId}}
         )
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Đổi mật khẩu thành công'
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+})
 
-exports.delete = async userId => {
+exports.delete = async userId => new Promise(async (resolve, reject) => {
     try {
-        const deleteUser = await User.findOne({
+        const deleteUser = await db.User.findOne({
+            raw: true,
             where: {id: userId},
             attributes: {exclude: 'password'}
         });
 
-        if (deleteUser.roleId === 0) {
-            return {
+        if (!deleteUser) {
+            return resolve({
                 success: false,
-                statusCode: 400,
-                message: 'Không thể xóa người dùng quản trị'
-            }
+                message: 'Không tìm thấy người dùng cần xóa'
+            })
         }
 
-        await User.destroy({where: {id: userId}});
+        // check admin user
+        if (deleteUser.roleId === 0) {
+            return resolve({
+                success: false,
+                message: 'Không thể xóa người dùng quản trị'
+            })
+        }
 
-        return {
+        await db.User.destroy({where: {id: userId}});
+
+        // delete image avatar in cloudinary server
+        if (deleteUser.cloudinaryId){
+            await cloudinary.uploader.destroy(deleteUser.cloudinaryId);
+        }
+
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Xóa người dùng thành công',
             deleteUser
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 

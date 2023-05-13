@@ -4,7 +4,7 @@ import UserService from '../services/user.service';
 // @desc get user
 // @access private
 exports.getUser = async (req, res) => {
-     // Check user not authorised or user not admin
+    // Check user not authorised or user not admin
     if ((req.params.id != req.userId) && req.roleId !== 0){
         return res.status(400).json({
             success: false,
@@ -16,11 +16,7 @@ exports.getUser = async (req, res) => {
         const userId = req.params.id;
         const data = await UserService.findById(userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            user: data.user
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -37,11 +33,7 @@ exports.getAllUsers = async (req, res) => {
     try {
         const data = await UserService.findAll();
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            allUsers: data.allUsers
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -72,12 +64,8 @@ exports.register = async (req, res) => {
 
     try {
         const data = await UserService.create(req.body);
-        return res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            accessToken: data.accessToken,
-            newUser: data.newUser
-        })
+        
+        return res.status(200).json(data)
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -101,12 +89,7 @@ exports.login = async (req, res) => {
     try {
         const data = await UserService.login(req.body.email, req.body.password);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            accessToken: data.accessToken,
-            user: data.user
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -120,13 +103,6 @@ exports.login = async (req, res) => {
 // @desc update user
 // @access private
 exports.update = async (req, res) => {
-    if (!req.body.fullName && !req.body.phoneNumber && !req.body.image){
-        return res.status(400).json({
-            success: false,
-            message: 'Không tìm thấy thông tin để cập nhật'
-        })
-    }
-
     // Check user not authorised or user not admin
     if ((req.params.id != req.userId) && req.roleId !== 0){
         return res.status(400).json({
@@ -135,20 +111,23 @@ exports.update = async (req, res) => {
         })
     }
 
+    if (!req.body.fullName && !req.body.phoneNumber && !req.file){
+        return res.status(400).json({
+            success: false,
+            message: 'Không tìm thấy thông tin để cập nhật'
+        })
+    }
+
     try {
         const payload = {
             fullName: req.body.fullName,
             phoneNumber: req.body.phoneNumber,
-            image: req.body.image
+            image: req.file?.path
         }
         const userId = req.params.id;
         const data = await UserService.update(payload, userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            updateUser: data.updateUser
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -183,11 +162,7 @@ exports.changePassword = async (req, res) => {
 
         const data = await UserService.updatePassword(password, newPassword, userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            user: data.user
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -206,11 +181,7 @@ exports.delete = async (req, res) => {
 
         const data = await UserService.delete(userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            deleteUser: data.deleteUser
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
