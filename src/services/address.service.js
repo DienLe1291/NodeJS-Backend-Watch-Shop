@@ -1,76 +1,59 @@
-import Address from '../models/address.model';
+import db from '../models';
 
-exports.create = async payload => {
+exports.create = async payload => new Promise(async (resolve, reject) => {
     try {
         // Set default address if this is first address of user
-        const addresses = await Address.findAll({where: {userId: payload.userId}});
-        if (addresses.length===0){
+        const address = await db.Address.findOne({where: {userId: payload.userId}});
+        if (!address){
             payload = {
                 ...payload,
                 isDefault: true
             }
         }
 
-        const newAddress = await Address.create(payload);
+        const newAddress = await db.Address.create(payload);
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Thêm mới địa chỉ thành công',
             newAddress
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error)
     }
-}
+}) 
 
-exports.findByUserId = async userId => {
+exports.findByUserId = async userId => new Promise(async (resolve, reject) => {
     try {
-        const addresses = await Address.findAll({where: {userId}});
+        const addresses = await db.Address.findAll({where: {userId}});
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             addresses
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.findById = async addressId => {
+exports.findById = async addressId => new Promise(async (resolve, reject) => {
     try {
-        const address = await Address.findByPk(addressId);
+        const address = await db.Address.findByPk(addressId);
 
-        return {
+        resolve({
             success: true,
             statusCode: 200,
             address
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.update = async (payload, addressId, userId) => {
+exports.update = async (payload, addressId, userId) => new Promise(async (resolve, reject) => {
     try {
         // update address in database
-        const rsp = await Address.update(payload, {where: {id: addressId, userId}})
+        const rsp = await db.Address.update(payload, {where: {id: addressId, userId}})
 
         // if update failure
         if (rsp[0] === 0){
@@ -81,114 +64,92 @@ exports.update = async (payload, addressId, userId) => {
             }
         }
 
-        const updateAddress = await Address.findByPk(addressId);
+        const updateAddress = await db.Address.findByPk(addressId);
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Cập nhật địa chỉ thành công',
             updateAddress
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.setDefaultAddress = async (addressId, userId) => {
+exports.setDefaultAddress = async (addressId, userId) => new Promise(async (resolve, reject) => {
     try {
         // get old default address
-        const oldDefaultAddress = await Address.findOne({where: {isDefault: true}});
+        const oldDefaultAddress = await db.Address.findOne({where: {isDefault: true}});
 
         // check new default address = old default address
         if (addressId == oldDefaultAddress.id){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Không thể cập nhật, địa chỉ này đã là mặc định'
-            }
+            })
         }
 
         // update new default address
-        const rsp = await Address.update(
+        const rsp = await db.Address.update(
             {isDefault: true},
             {where: {id: addressId, userId}}
         )
 
         // if update failure
         if (rsp[0] === 0){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 401,
                 message: 'Không tìm thấy địa chỉ hoặc người dùng không có quyền để cập nhật địa chỉ này'
-            }
+            })
         }
 
         // remove old default address
-        await Address.update(
+        await db.Address.update(
             {isDefault: false},
             {where: {id: oldDefaultAddress.id}}
         )
 
-        const defaultAddress = await Address.findByPk(addressId);
+        const defaultAddress = await db.Address.findByPk(addressId);
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Cập nhật địa chỉ mặc định thành công',
             defaultAddress
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.delete = async (addressId, userId) => {
+exports.delete = async (addressId, userId) => new Promise(async (resolve, reject) => {
     try {
-        const deleteAddress = await Address.findByPk(addressId);
+        const deleteAddress = await db.Address.findByPk(addressId);
 
         // check default address
         if (deleteAddress?.isDefault) {
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Không thể xóa địa chỉ mặc định'
-            }
+            })
         }
 
         // delete address in database
-        const rsp = await Address.destroy({where: {id: addressId, userId}})
+        const rsp = await db.Address.destroy({where: {id: addressId, userId}})
 
         // if delete failure
         if (rsp === 0){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 401,
                 message: 'Không tìm thấy địa chỉ hoặc người dùng không có quyền để xóa địa chỉ này'
-            }
+            })
         }
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Xóa địa chỉ thành công',
             deleteAddress
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 

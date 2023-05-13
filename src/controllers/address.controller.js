@@ -8,11 +8,7 @@ exports.getAddressByUser = async (req, res) => {
         const userId = req.userId;
         const data = await AddressService.findByUserId(userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            addresses: data.addresses
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -43,11 +39,7 @@ exports.create = async (req, res) => {
 
         const data = await AddressService.create(payload);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            newAddress: data.newAddress
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -73,11 +65,7 @@ exports.update = async (req, res) => {
 
         const data = await AddressService.update(payload, addressId, userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            updateAddress: data.updateAddress
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -97,11 +85,7 @@ exports.updateDefaultAddress = async (req, res) => {
 
         const data = await AddressService.setDefaultAddress(addressId, userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            defaultAddress: data.defaultAddress
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -111,7 +95,7 @@ exports.updateDefaultAddress = async (req, res) => {
     }
 }
 
-// @route PUT /api/address/:id
+// @route DELETE /api/address/:id
 // @desc delete an address by id
 // @access private
 exports.delete = async (req, res) => {
@@ -121,11 +105,7 @@ exports.delete = async (req, res) => {
 
         const data = await AddressService.delete(addressId, userId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            deleteAddress: data.deleteAddress
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
