@@ -1,46 +1,32 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/connectDB';
-import Comment from './comment.model';
-import Brand from './brand.model';
-
-const Watch = sequelize.define('Watch', {
-    id: {
-        type: DataTypes.BIGINT(11),
-        primaryKey: true,
-        autoIncrement: true
-    },
-    currentQuantity: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-    },
-    price: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-    },
-    image: {
-        type: DataTypes.STRING
-    },
-    cloudinaryId: {
-        type: DataTypes.STRING
-    },
-    description: {
-        type: DataTypes.TEXT
-    },
-    brandId: {
-        type: DataTypes.BIGINT(11),
-        allowNull: false,
-        references: {
-            model: Brand,
-            key: 'id'
+'use strict';
+const {
+    Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+    class Watch extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            // define association here
+            Watch.hasMany(models.Detail, { foreignKey: 'watchId', as: 'watchDetail' })
+            Watch.hasMany(models.Comment, { foreignKey: 'watchId', as: 'watchComment' })
+            Watch.hasMany(models.Cart, { foreignKey: 'watchId', as: 'watchCart' })
+            Watch.belongsTo(models.Brand, { foreignKey: 'brandId', targetKey: 'id', as: 'brand' })
         }
     }
-}, {
-    tableName: 'watches'
-});
-
-Watch.belongsTo(Brand, { foreignKey: 'brandId', as: 'brand' });
-Watch.hasMany(Comment, { foreignKey: 'watchId', as: 'watch' });
-
-export default Watch;
+    Watch.init({
+        currentQuantity: DataTypes.INTEGER,
+        price: DataTypes.INTEGER,
+        image: DataTypes.STRING,
+        cloudinaryId: DataTypes.STRING,
+        description: DataTypes.TEXT,
+        brandId: DataTypes.BIGINT(11)
+    }, {
+        sequelize,
+        modelName: 'Watch',
+    });
+    return Watch;
+};

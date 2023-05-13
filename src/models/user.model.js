@@ -1,51 +1,33 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/connectDB';
-import Address from './address.model';
-import Comment from './comment.model';
-import Order from './order.model';
-
-const User = sequelize.define('User', {
-    id: {
-        type: DataTypes.BIGINT(11),
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
-    },
-    email: {
-        type: DataTypes.STRING,
-        unique: true,
-        allowNull: false
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    fullName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    phoneNumber: {
-        type: DataTypes.STRING,
-        defaultValue: null
-    },
-    image: {
-        type: DataTypes.STRING,
-        defaultValue: null
-    },
-    cloudinaryId: {
-        type: DataTypes.STRING
-    },
-    roleId: {
-        type: DataTypes.INTEGER,
-        defaultValue: 1, // 0: admin, 1: customer
-        allowNull: false
+'use strict';
+const {
+    Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+    class User extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            // define association here
+            User.hasMany(models.Address, { foreignKey: 'userId', as: 'userAddress' })
+            User.hasMany(models.Cart, { foreignKey: 'userId', as: 'userCart' })
+            User.hasMany(models.Order, { foreignKey: 'userId', as: 'userOrder' })
+            User.hasMany(models.Comment, { foreignKey: 'userId', as: 'userComment' })
+        }
     }
-}, {
-    tableName: 'users'
-});
-
-User.hasMany(Address, { foreignKey: 'userId', as: 'user' });
-User.hasMany(Comment, { foreignKey: 'userId', as: 'user' });
-User.hasMany(Order, { foreignKey: 'userId', as: 'user' });
-
-export default User;
+    User.init({
+        email: DataTypes.STRING,
+        password: DataTypes.STRING,
+        fullName: DataTypes.STRING,
+        phoneNumber: DataTypes.STRING,
+        image: DataTypes.STRING,
+        cloudinaryId: DataTypes.STRING,
+        roleId: DataTypes.INTEGER
+    }, {
+        sequelize,
+        modelName: 'User',
+    });
+    return User;
+};

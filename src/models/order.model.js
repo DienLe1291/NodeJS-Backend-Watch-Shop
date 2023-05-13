@@ -1,48 +1,35 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/connectDB';
-import User from './user.model';
-import Order_Status from './order_status.model';
-
-const Order = sequelize.define('Order', {
-    id: {
-        type: DataTypes.BIGINT(11),
-        primaryKey: true,
-        autoIncrement: true
-    },
-    date: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
-    totalAmount: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    payMethod: {
-        type: DataTypes.INTEGER
-    },
-    isPayment: {
-        type: DataTypes.BOOLEAN
-    },
-    userId: {
-        type: DataTypes.BIGINT(11),
-        references: {
-            model: User,
-            key: 'id'
-        }
-    },
-    statusId: {
-        type: DataTypes.BIGINT(11),
-        defaultValue: 1,
-        references: {
-            model: Order_Status,
-            key: 'id'
+'use strict';
+const {
+    Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+    class Order extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            // define association here
+            Order.hasMany(models.Detail, { foreignKey: 'orderId', as: 'order' })
+            Order.belongsTo(models.Status, { foreignKey: 'statusId', targetKey: 'id', as: 'status' })
+            Order.belongsTo(models.User, { foreignKey: 'userId', targetKey: 'id', as: 'user' })
         }
     }
-}, {
-    tableName: 'orders'
-});
-
-Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Order.belongsTo(Order_Status, { foreignKey: 'statusId', as: 'order_status' });
-
-export default Order;
+    Order.init({
+        date: DataTypes.DATE,
+        totalAmount: DataTypes.INTEGER,
+        payMethod: DataTypes.INTEGER,
+        isPayment: DataTypes.BOOLEAN,
+        province: DataTypes.STRING,
+        district: DataTypes.STRING,
+        ward: DataTypes.STRING,
+        detail: DataTypes.TEXT,
+        userId: DataTypes.BIGINT(11),
+        statusId: DataTypes.BIGINT(11)
+    }, {
+        sequelize,
+        modelName: 'Order',
+    });
+    return Order;
+};
