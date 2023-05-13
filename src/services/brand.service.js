@@ -1,118 +1,94 @@
-import Brand from '../models/brand.model';
+import db from '../models';
 import cloudinary from "../utils/cloudinary";
+import fs from 'fs';
 
-exports.create = async (name, image) => {
+exports.create = async (name, image) => new Promise(async (resolve, reject) => {
     try {
         // Check brand name already exist
-        const brandExist = await Brand.findOne({where: {name}});
+        const brandExist = await db.Brand.findOne({where: {name}});
         if (brandExist) {
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Thương hiệu đã tồn tại'
-            }
+            })
         }
 
         // upload image to cloudinary server
         const uploadImage = await cloudinary.uploader.upload(image, {folder: 'watch_shop/brands'});
+        fs.unlink(image, (err) => {
+            if (err) console.log(err);
+        });
 
         // create new brand
-        const newBrand = await Brand.create({
+        const newBrand = await db.Brand.create({
             name,
             image: uploadImage.secure_url,
             cloudinaryId: uploadImage.public_id
         })
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Thêm mới thương hiệu thành công',
             newBrand
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.findById = async brandId => {
+exports.findById = async brandId => new Promise(async (resolve, reject) => {
     try {
-        // find brand by id in database
-        const brand = await Brand.findOne({
-            where: {id: brandId},
-            attributes: {exclude: 'cloudinaryId'}
-        });
+        const brand = await db.Brand.findByPk(brandId);
 
         // brand not found
         if (!brand){
-            return {
+            return resolve({
                 success: false,
-                statusCode: 400,
                 message: 'Không tìm thấy thương hiệu'
-            }
+            })
         }
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             brand
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.findAll = async () => {
+exports.findAll = async () => new Promise(async (resolve, reject) => {
     try {
-        // get all brands in database
-        const allBrands = await Brand.findAll({
-            attributes: {exclude: 'cloudinaryId'}
-        });
+        const allBrands = await db.Brand.findAll();
 
-        return {
+        resolve({
             success: true,
-            statusCode: 200,
             allBrands
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.update = async (name, image, brandId) => {
+exports.update = async (name, image, brandId) => new Promise(async (resolve, reject) => {
     try {
-        const brand = await Brand.findOne({where: {id: brandId}});
+        const brand = await db.Brand.findOne({where: {id: brandId}});
 
         // Image not found
         if (!image) {
             // update brand in database
-            await Brand.update(
+            await db.Brand.update(
                 {name: name ? name : brand.name},
                 {where: {id: brandId}}
             )
 
-            const updateBrand = await Brand.findOne({where: {id: brandId}});
-
-            return {
+            // get brand updated
+            const updateBrand = await db.Brand.findOne({where: {id: brandId}});
+            return resolve({
                 success: true,
-                statusCode: 200,
                 message: 'Cập nhật thông tin thương hiệu thành công',
                 updateBrand
-            }
+            })
         }
         else {
             // delete old image in cloudinary server
@@ -120,9 +96,10 @@ exports.update = async (name, image, brandId) => {
 
             // upload new image to cloudinary server
             const newImage = await cloudinary.uploader.upload(image, {folder: 'watch_shop/brands'});
+            fs.unlink(image, (err) => {console.log(err)})
 
             // update brand in database
-            await Brand.update(
+            await db.Brand.update(
                 {
                     name: name ? name : brand.name,
                     image: newImage.secure_url,
@@ -131,46 +108,35 @@ exports.update = async (name, image, brandId) => {
                 {where: {id: brandId}}
             )
 
-            const updateBrand = await Brand.findOne({where: {id: brandId}});
-
-            return {
+            // get brand updated
+            const updateBrand = await db.Brand.findOne({where: {id: brandId}});
+            return resolve({
                 success: true,
-                statusCode: 200,
                 message: 'Cập nhật thông tin thương hiệu thành công',
                 updateBrand
-            }
+            })
         }
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 
 
-exports.delete = async brandId => {
+exports.delete = async brandId => new Promise(async (resolve, reject) => {
     try {
-        const deleteBrand = await Brand.findOne({
-            where: {id: brandId},
-            attributes: {exclude: 'cloudinaryId'}
-        })
+        const deleteBrand = await db.Brand.findOne({ where: {id: brandId} })
 
-        await Brand.destroy({where: {id: brandId}});
+        // delete brand in database
+        await db.Brand.destroy({where: {id: brandId}});
 
-        return {
+        // delete image in cloudinary store
+        await cloudinary.uploader.destroy(deleteBrand.cloudinaryId);
+
+        resolve({
             success: true,
-            statusCode: 200,
             message: 'Xóa thương hiệu thành công',
             deleteBrand
-        }
+        })
     } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            statusCode: 500,
-            message: 'Lỗi máy chủ'
-        }
+        reject(error);
     }
-}
+}) 

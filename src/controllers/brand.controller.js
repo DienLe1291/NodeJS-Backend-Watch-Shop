@@ -8,11 +8,7 @@ exports.getBrand = async (req, res) => {
         const brandId = req.params.id;
         const data = await BrandService.findById(brandId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            brand: data.brand
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -29,11 +25,7 @@ exports.getAllBrands = async (req, res) => {
     try {
         const data = await BrandService.findAll();
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            allBrands: data.allBrands
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -59,11 +51,7 @@ exports.create = async (req, res) => {
         const image = req.file.path;
         const data = await BrandService.create(name, image);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            newBrand: data.newBrand
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -84,11 +72,7 @@ exports.update = async (req, res) => {
         
         const data = await BrandService.update(name, image, brandId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            updateBrand: data.updateBrand
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -107,11 +91,7 @@ exports.delete = async (req, res) => {
         
         const data = await BrandService.delete(brandId);
 
-        res.status(data.statusCode).json({
-            success: data.success,
-            message: data.message,
-            deleteBrand: data.deleteBrand
-        })
+        res.status(200).json(data)
     } catch (error) {
         console.log(error);
         res.status(500).json({
