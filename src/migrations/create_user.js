@@ -29,7 +29,8 @@ module.exports = {
                 defaultValue: null
             },
             cloudinaryId: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                defaultValue: null
             },
             roleId: {
                 type: Sequelize.INTEGER,

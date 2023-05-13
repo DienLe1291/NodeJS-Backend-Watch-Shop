@@ -20,7 +20,8 @@ module.exports = {
                 type: Sequelize.INTEGER
             },
             isPayment: {
-                type: Sequelize.BOOLEAN
+                type: Sequelize.BOOLEAN,
+                defaultValue: false
             },
             userId: {
                 type: Sequelize.BIGINT(11)

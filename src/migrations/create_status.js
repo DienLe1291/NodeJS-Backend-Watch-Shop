@@ -2,13 +2,13 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('order_status', {
+        await queryInterface.createTable('statuses', {
             id: {
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.BIGINT(11)
             },
-            name: {
+            statusCode: {
                 type: Sequelize.STRING
             },
             createdAt: {
@@ -22,6 +22,6 @@ module.exports = {
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('order_status');
+        await queryInterface.dropTable('statuses');
     }
 };
