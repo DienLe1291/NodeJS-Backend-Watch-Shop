@@ -133,7 +133,7 @@ exports.update = async (payload, userId) => new Promise(async (resolve, reject) 
         if (payload.image) {
             // upload new avatar to cloudinary server
             const uploadImage = await cloudinary.uploader.upload(payload.image, {folder: 'watch_shop/user_avatar'});
-            fs.unlink(payload.image, (err) => {console.log(err)})
+            fs.unlink(payload.image, (err) => {if(err) console.log(err)})
             
             payload = {
                 ...payload,
