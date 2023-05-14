@@ -96,7 +96,7 @@ exports.update = async (name, image, brandId) => new Promise(async (resolve, rej
 
             // upload new image to cloudinary server
             const newImage = await cloudinary.uploader.upload(image, {folder: 'watch_shop/brands'});
-            fs.unlink(image, (err) => {console.log(err)})
+            fs.unlink(image, (err) => {if(err) console.log(err)})
 
             // update brand in database
             await db.Brand.update(
