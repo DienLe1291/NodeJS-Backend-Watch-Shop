@@ -14,6 +14,6 @@ cloudinaryV2.config({
     api_key: apiKey,
     api_secret: apiSecret,
     secure: true
-})
+}) 
 
 export default cloudinaryV2;

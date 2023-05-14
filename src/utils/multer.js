@@ -10,7 +10,7 @@ const upload = multer({
             return;
         }
         cb(null, true);
-    }
+    } 
 })
 
 export default upload;
