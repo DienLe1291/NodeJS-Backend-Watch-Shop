@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Watch.init({
+        name: DataTypes.STRING,
         currentQuantity: DataTypes.INTEGER,
         price: DataTypes.INTEGER,
         image: DataTypes.STRING,
