@@ -63,7 +63,7 @@ exports.update = async (payload, addressId, userId) => new Promise(async (resolv
 
         // if update failure
         if (rsp[0] === 0){
-            resolve({
+            return resolve({
                 success: false,
                 message: 'Không tìm thấy địa chỉ hoặc người dùng không có quyền để cập nhật địa chỉ này'
             })
