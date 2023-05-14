@@ -7,11 +7,11 @@ const router = express.Router();
 
 router.route('/')
     .get(CommentController.getAllComments)
-    .post(verifyToken, CommentController.create)
+    .post(verifyToken, upload.single('image'), CommentController.create)
 
 router.route('/:id')
     .get(verifyToken, CommentController.getComment)
-    .put(verifyToken, CommentController.update)
+    .put(verifyToken, upload.single('image'), CommentController.update)
     .delete(verifyToken, CommentController.delete)
 
 export default router;
