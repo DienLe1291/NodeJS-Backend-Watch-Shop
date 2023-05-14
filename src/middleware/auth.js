@@ -8,7 +8,7 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({
             success: false,
             message: 'Không tìm thấy mã truy cập'
-        })
+        }) 
     }
 
     try {
